@@ -90,16 +90,15 @@ with tab4:
     
         col_check, col_quote = st.columns([1, 2])
     
-        with col_check:
-        workout_done = st.checkbox("יצאתי לאימון היום! 🏋️")
-        ate_well = st.checkbox("אכלתי לפי התפריט 🍱")
+       with col_check:
+        workout_done = st.checkbox("יצאתי לאימון היום! 🏋️") # מוזז ימינה יחסית ל-with
+        ate_well = st.checkbox("אכלתי לפי התפריט 🍱")      # מוזז ימינה יחסית ל-with
         
-        with col_quote:
+    with col_quote:
         if workout_done:
-            # בוחר משפט רנדומלי ומציג אותו בתוך תיבה יפה
-            quote = random.choice(motivational_quotes)
-            st.success(f"**כל הכבוד אלוף!** \n\n {quote}")
-            st.balloons() # מוסיף חגיגת בלונים על המסך
+            quote = random.choice(motivational_quotes)   # מוזז ימינה יחסית ל-if
+            st.success(f"**כל הכבוד אלוף!** \n\n {quote}") # מוזז ימינה יחסית ל-if
+            st.balloons()                                # מוזז ימינה יחסית ל-if
             
-    if st.button("שמור נתונים ביומן"):
-        st.toast("הנתונים נשמרו בהצלחה!")
+            if st.button("שמור נתונים ביומן"):
+            st.toast("הנתונים נשמרו בהצלחה!")
