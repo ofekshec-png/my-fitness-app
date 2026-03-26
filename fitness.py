@@ -12,132 +12,163 @@ genai.configure(api_key=API_KEY)
 # הגדרה של המודל
 model = genai.GenerativeModel('gemini-1.5-flash')
 
-st.set_page_config(page_title="BodyTrack AI", layout="wide")
+st.set_page_config(page_title="BodyTrack AI | Pro Edition", layout="wide")
 
-# עיצוב האתר ליישור לימין (RTL) וצבעים
+# עיצוב חדשני - Cyber Fitness Style
 st.markdown("""
     <style>
-    /* יישור כל האתר לימין */
+    /* הגדרות כלליות ויישור לימין */
     .main, .stApp {
         direction: RTL;
         text-align: right;
+        background-color: #050a0e;
     }
     
-    /* סידור כפתורים */
-    div.stButton > button {
-        width: 100%;
-        border-radius: 10px;
-        height: 3em;
-        background-color: #00cc66;
-        color: white;
-        border: none;
+    /* עיצוב כותרת ראשית */
+    h1 {
+        color: #00ff88;
+        text-shadow: 0px 0px 15px rgba(0, 255, 136, 0.5);
+        font-family: 'Assistant', sans-serif;
+        font-weight: 800;
     }
-    
-    /* תיקון כיוון ללשוניות (Tabs) */
+
+    /* עיצוב כרטיסיות ותיבות */
     .stTabs [data-baseweb="tab-list"] {
-        direction: RTL;
-        justify-content: flex-start;
+        gap: 10px;
+        background-color: transparent;
+    }
+    .stTabs [data-baseweb="tab"] {
+        background-color: #1a1f24;
+        border-radius: 10px 10px 0px 0px;
+        color: white;
+        padding: 10px 20px;
+    }
+    .stTabs [aria-selected="true"] {
+        background-color: #00ff88 !important;
+        color: #050a0e !important;
+        font-weight: bold;
     }
 
-    /* יישור כותרות וטקסט */
-    h1, h2, h3, p, span, label, .stMarkdown {
-        text-align: right;
-        direction: RTL;
+    /* כפתור "ניאון" */
+    div.stButton > button {
+        background: linear-gradient(90deg, #00ff88, #00cc66);
+        color: #050a0e;
+        font-weight: bold;
+        border: none;
+        border-radius: 12px;
+        transition: 0.3s;
+        box-shadow: 0px 4px 15px rgba(0, 255, 136, 0.2);
     }
-    
-    /* תיקון מיקום האייקונים בהודעות */
-    .stAlert {
-        direction: RTL;
-        text-align: right;
+    div.stButton > button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0px 6px 20px rgba(0, 255, 136, 0.4);
+        color: #050a0e;
     }
 
-    /* תיקון לשדות קלט (מספרים וטקסט) */
+    /* תיקון לסליידר (Slider) שיוכל לעבוד ב-RTL */
+    .stSlider [data-baseweb="slider"] {
+        direction: LTR; /* מחזיר לשמאל רק את המנגנון כדי שיעבוד */
+        margin-top: 25px;
+    }
+
+    /* עיצוב תיבות הקלט */
     .stNumberInput, .stTextInput, .stSelectbox {
-        direction: RTL;
-        text-align: right;
+        background-color: #1a1f24;
+        border-radius: 8px;
+    }
+
+    /* הודעות הצלחה */
+    .stSuccess {
+        background-color: rgba(0, 255, 136, 0.1);
+        border: 1px solid #00ff88;
+        color: #00ff88;
     }
     </style>
     """, unsafe_allow_html=True)
 
-st.title("💪 BodyTrack AI - המאמן האישי שלך")
+st.title("⚡ BodyTrack AI Pro")
+st.subheader("Keep Pushing. No Excuses.")
 
-tab1, tab2, tab3, tab4 = st.tabs(["📸 סורק ותפריט", "🏋️ תוכנית אימונים", "📊 מחשבון BMI", "📝 יומן מעקב"])
+tab1, tab2, tab3, tab4 = st.tabs(["📸 סורק ארוחות", "🏋️ תוכניות אימון", "📊 מדדים", "📝 יומן"])
 
 with tab1:
     col1, col2 = st.columns(2)
     with col1:
-        st.header("ניתוח ארוחה")
-        uploaded_file = st.file_uploader("צלם/העלה ארוחה", type=["jpg", "png"])
+        st.header("🔍 ניתוח ארוחה חכם")
+        uploaded_file = st.file_uploader("העלה תמונה של הצלחת", type=["jpg", "png"])
         if uploaded_file:
             image = Image.open(uploaded_file)
             st.image(image, use_column_width=True)
-            if st.button("נתח ערכים"):
-                with st.spinner('מנתח...'):
+            if st.button("נתח ערכים תזונתיים"):
+                with st.spinner('המנוע בודק את הצלחת...'):
                     try:
-                        prompt = "Analyze this image. Provide: Calories, Protein, Carbs, Fats. Respond in Hebrew."
+                        prompt = "Analyze this meal image. Provide Calories, Protein, Carbs, Fats. Respond in Hebrew in a clean list."
                         res = model.generate_content([prompt, image])
                         st.info(res.text)
-                    except Exception as e:
-                        st.error("השרת זיהה עומס. נסה שוב בעוד רגע.")
+                    except:
+                        st.error("השרת עמוס, נסה שוב בעוד דקה.")
 
     with col2:
-        st.header("בניית תפריט יומי")
-        target = st.selectbox("תפריט לטובת:", ["מסה נקייה", "מסה מלוכלכת", "חיטוב"])
-        if st.button("בנה לי תפריט מומלץ"):
+        st.header("🥗 תפריט מותאם")
+        target = st.selectbox("מה המטרה שלך?", ["מסה נקייה", "מסה מלוכלכת (Dirty Bulk)", "חיטוב אגרסיבי"])
+        if st.button("צור תפריט עכשיו"):
             try:
-                res = model.generate_content(f"צור תפריט יומי ל{target} עם דגש על חלבון גבוה. ענה בעברית.")
+                res = model.generate_content(f"צור תפריט יומי מפורט ל{target} עם דגש על חלבון גבוה. ענה בעברית.")
                 st.success(res.text)
             except:
-                st.error("עומס על השרת, נסה שוב בעוד דקה.")
+                st.error("גוגל צריכה הפסקה קצרה.")
 
 with tab2:
-    st.header("בניית תוכנית לפי מיקום")
-    location = st.radio("איפה מתאמנים היום?", ["חדר כושר", "משקל גוף (בית)", "גינת כושר ציבורית"])
-    goal = st.selectbox("מטרה:", ["עליה במסה", "כוח מרבי", "סיבולת"])
-    days = st.slider("ימים בשבוע", 1, 7, 3)
-    if st.button("צור תוכנית אימון"):
-        try:
-            res = model.generate_content(f"Create a workout plan for {goal} at {location} for {days} days. Hebrew.")
-            st.write(res.text)
-        except:
-            st.error("גוגל צריכה הפסקה קצרה. נסה שוב בעוד רגע.")
+    st.header("⚡ תוכנית אימון אישית")
+    col_a, col_b = st.columns(2)
+    with col_a:
+        location = st.radio("מיקום האימון:", ["חדר כושר", "בית (משקל גוף)", "מתקני פארק"])
+    with col_b:
+        goal = st.selectbox("מטרה עיקרית:", ["בניית שריר (Hypertrophy)", "כוח מתפרץ", "סיבולת"])
+    
+    # הסליידר עובד עכשיו בזכות התיקון ב-CSS
+    days = st.slider("כמה ימים בשבוע להקדיש?", 1, 7, 3)
+    
+    if st.button("בנה לי תוכנית אימון"):
+        with st.spinner('בונה תוכנית מנצחת...'):
+            try:
+                res = model.generate_content(f"Create a workout plan for {goal} at {location} for {days} days. Hebrew.")
+                st.markdown(res.text)
+            except:
+                st.error("חסימת עומס, נסה שוב בעוד רגע.")
 
 with tab3:
-    st.header("מחשבון מדדים")
-    w = st.number_input("משקל בקילוגרמים", 30.0, 200.0, 60.0)
-    h = st.number_input("גובה בסנטימטרים", 100, 250, 180)
+    st.header("📊 מחשבון התקדמות")
+    w = st.number_input("משקל (kg)", 30.0, 200.0, 60.0)
+    h = st.number_input("גובה (cm)", 100, 250, 180)
     if h > 0:
         bmi = w / ((h/100)**2)
         st.metric("ה-BMI שלך", f"{bmi:.1f}")
-        if bmi < 18.5: st.warning("תת-משקל - זמן למסה!")
-        elif bmi < 25: st.success("משקל תקין")
-        else: st.info("עודף משקל")
+        if bmi < 18.5: st.warning("מצב: תת משקל. הגיע הזמן לאכול!")
+        elif bmi < 25: st.success("מצב: תקין. תמשיך ככה!")
+        else: st.info("מצב: עודף משקל. זמן לזוז.")
 
 with tab4:
-    st.header("📝 יומן מעקב ומוטיבציה")
-    st.write(f"היום: {datetime.date.today()}")
+    st.header("📝 יומן ניצחונות")
+    st.write(f"תאריך: {datetime.date.today()}")
     
     motivational_quotes = [
-        "המסה של היום היא השריר של מחר! 💪",
-        "אל תפסיק כשאתה עייף, תפסיק כשסיימת. 🔥",
-        "כל חלבון נחשב, כל סט מקדם אותך למטרה. 🍗",
-        "הגוף שלך מסוגל להכל, זה רק הראש שצריך לשכנע. 🧠",
-        "זכור למה התחלת – המטרה קרובה מתמיד! 🎯",
-        "אין קיצורי דרך, יש רק עבודה קשה ותוצאות. ⚡",
-        "התמדה היא הסוד. פשוט תופיע לאימון. 🚀"
+        "הכאב של היום הוא הכוח של מחר. 💪",
+        "אל תסתכל על המרחק, תסתכל על הצעד הבא. 🔥",
+        "התירוצים לא בונים שרירים. 🍗",
+        "תהיה הגרסה הכי טובה של עצמך. 🧠",
+        "הצלחה מתחילה בהחלטה לנסות. 🎯"
     ]
     
-    col_check, col_quote = st.columns([1, 2])
+    c1, c2 = st.columns(2)
+    with c1:
+        workout_done = st.checkbox("סיימתי אימון היום! ✅")
+        ate_well = st.checkbox("עמדתי בתפריט! 🍱")
     
-    with col_check:
-        workout_done = st.checkbox("יצאתי לאימון היום! 🏋️")
-        ate_well = st.checkbox("אכלתי לפי התפריט 🍱")
-        
-    with col_quote:
+    with c2:
         if workout_done:
-            quote = random.choice(motivational_quotes)
-            st.success(f"**כל הכבוד אלוף!** \n\n {quote}")
+            st.success(random.choice(motivational_quotes))
             st.balloons()
             
-    if st.button("שמור נתונים ביומן"):
-        st.toast("הנתונים נשמרו בהצלחה!")
+    if st.button("שמור ביומן"):
+        st.toast("הנתונים נשמרו! גאה בך.")
