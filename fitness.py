@@ -76,8 +76,6 @@ with tab3:
 with tab4:
         st.header("📝 יומן מעקב ומוטיבציה")
         st.write(f"היום: {datetime.date.today()}")
-    # --- בתוך טאב 4 (יומן מעקב) ---
-    with tab4:
         st.header("📝 יומן מעקב ומוטיבציה")
         st.write(f"היום: {datetime.date.today()}")
         
