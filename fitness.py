@@ -88,7 +88,7 @@ with tab4:
         "התמדה היא הסוד. פשוט תופיע לאימון. 🚀"
     ]
     
-    col_check, col_quote = st.columns([1, 2])
+        col_check, col_quote = st.columns([1, 2])
     
     with col_check:
         workout_done = st.checkbox("יצאתי לאימון היום! 🏋️")
