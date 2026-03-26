@@ -4,11 +4,12 @@ from PIL import Image
 import datetime
 import time
 import random
-# הגדרות API
-API_KEY = "AIzaSyCii8GHxQdZ0DY9F1UxP9D42UWRt2bgfIc"
+
+# --- עדכון כאן: שימוש ב-Secrets במקום מפתח חשוף ---
+API_KEY = st.secrets["GOOGLE_API_KEY"]
 genai.configure(api_key=API_KEY)
 
-# הגדרה ישירה של המודל כדי לעקוף את השגיאה בשרת
+# הגדרה ישירה של המודל
 model = genai.GenerativeModel('gemini-1.5-flash')
 
 st.set_page_config(page_title="BodyTrack AI", layout="wide")
@@ -39,7 +40,7 @@ with tab1:
                         res = model.generate_content([prompt, image])
                         st.info(res.text)
                     except Exception as e:
-                        st.error("שלחת יותר מדי בקשות לגוגל. חכה 30 שניות ונסה שוב.")
+                        st.error("השרת זיהה עומס. נסה שוב בעוד רגע.")
 
     with col2:
         st.header("בניית תפריט יומי")
@@ -61,7 +62,7 @@ with tab2:
             res = model.generate_content(f"Create a workout plan for {goal} at {location} for {days} days. Hebrew.")
             st.write(res.text)
         except:
-            st.error("חכה רגע... גוגל צריכה הפסקה של 30 שניות.")
+            st.error("גוגל צריכה הפסקה קצרה. נסה שוב בעוד רגע.")
 
 with tab3:
     st.header("מחשבון מדדים")
@@ -73,34 +74,32 @@ with tab3:
         if bmi < 18.5: st.warning("תת-משקל - זמן למסה!")
         elif bmi < 25: st.success("משקל תקין")
         else: st.info("עודף משקל")
+
 with tab4:
-        st.header("📝 יומן מעקב ומוטיבציה")
-        st.write(f"היום: {datetime.date.today()}")
-        st.header("📝 יומן מעקב ומוטיבציה")
-        st.write(f"היום: {datetime.date.today()}")
+    st.header("📝 יומן מעקב ומוטיבציה")
+    st.write(f"היום: {datetime.date.today()}")
+    
+    motivational_quotes = [
+        "המסה של היום היא השריר של מחר! 💪",
+        "אל תפסיק כשאתה עייף, תפסיק כשסיימת. 🔥",
+        "כל חלבון נחשב, כל סט מקדם אותך למטרה. 🍗",
+        "הגוף שלך מסוגל להכל, זה רק הראש שצריך לשכנע. 🧠",
+        "זכור למה התחלת – המטרה קרובה מתמיד! 🎯",
+        "אין קיצורי דרך, יש רק עבודה קשה ותוצאות. ⚡",
+        "התמדה היא הסוד. פשוט תופיע לאימון. 🚀"
+    ]
+    
+    col_check, col_quote = st.columns([1, 2])
+    
+    with col_check:
+        workout_done = st.checkbox("יצאתי לאימון היום! 🏋️")
+        ate_well = st.checkbox("אכלתי לפי התפריט 🍱")
         
-        motivational_quotes = [
-            "המסה של היום היא השריר של מחר! 💪",
-            "אל תפסיק כשאתה עייף, תפסיק כשסיימת. 🔥",
-            "כל חלבון נחשב, כל סט מקדם אותך למטרה. 🍗",
-            "הגוף שלך מסוגל להכל, זה רק הראש שצריך לשכנע. 🧠",
-            "זכור למה התחלת – המטרה קרובה מתמיד! 🎯",
-            "אין קיצורי דרך, יש רק עבודה קשה ותוצאות. ⚡",
-            "התמדה היא הסוד. פשוט תופיע לאימון. 🚀"
-        ]
-        
-        col_check, col_quote = st.columns([1, 2])
-        
-        with col_check:
-            workout_done = st.checkbox("יצאתי לאימון היום! 🏋️")
-            ate_well = st.checkbox("אכלתי לפי התפריט 🍱")
+    with col_quote:
+        if workout_done:
+            quote = random.choice(motivational_quotes)
+            st.success(f"**כל הכבוד אלוף!** \n\n {quote}")
+            st.balloons()
             
-        with col_quote:
-            if workout_done:
-                quote = random.choice(motivational_quotes)
-                st.success(f"**כל הכבוד אלוף!** \n\n {quote}")
-                st.balloons()
-                
-        if st.button("שמור נתונים ביומן"):
-            st.toast("הנתונים נשמרו בהצלחה!")
- 
+    if st.button("שמור נתונים ביומן"):
+        st.toast("הנתונים נשמרו בהצלחה!")
