@@ -73,14 +73,12 @@ with tab3:
         if bmi < 18.5: st.warning("תת-משקל - זמן למסה!")
         elif bmi < 25: st.success("משקל תקין")
         else: st.info("עודף משקל")
-
-with tab4:# --- בתוך טאב 4 (יומן מעקב) ---
 with tab4:
-    st.header("📝 יומן מעקב ומוטיבציה")
-    st.write(f"היום: {datetime.date.today()}")
+        st.header("📝 יומן מעקב ומוטיבציה")
+        st.write(f"היום: {datetime.date.today()}")
     
-    # רשימת משפטי מוטיבציה למסה ואימונים
-    motivational_quotes = [
+        # רשימת משפטי מוטיבציה למסה ואימונים
+        motivational_quotes = [
         "המסה של היום היא השריר של מחר! 💪",
         "אל תפסיק כשאתה עייף, תפסיק כשסיימת. 🔥",
         "כל חלבון נחשב, כל סט מקדם אותך למטרה. 🍗",
