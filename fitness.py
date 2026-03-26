@@ -8,16 +8,10 @@ import time
 API_KEY = "AIzaSyCii8GHxQdZ0DY9F1UxP9D42UWRt2bgfIc"
 genai.configure(api_key=API_KEY)
 
-def get_model():
-    for m in genai.list_models():
-        if 'generateContent' in m.supported_generation_methods:
-            if 'flash' in m.name or 'pro' in m.name:
-                return genai.GenerativeModel(m.name)
-    return genai.GenerativeModel('gemini-1.5-flash')
+# הגדרה ישירה של המודל כדי לעקוף את השגיאה בשרת
+model = genai.GenerativeModel('gemini-1.5-flash')
 
-model = get_model()
-
-st.set_page_config(page_title="BodyTrack AI", layout="wide")
+st.set_page_config(page_title="BodyTrack AI", layout="wide")SSדדSS
 
 st.markdown("""
     <style>
