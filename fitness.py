@@ -5,19 +5,57 @@ import datetime
 import time
 import random
 
-# --- עדכון כאן: שימוש ב-Secrets במקום מפתח חשוף ---
+# הגדרת המפתח מתוך ה-Secrets של Streamlit
 API_KEY = st.secrets["GOOGLE_API_KEY"]
 genai.configure(api_key=API_KEY)
 
-# הגדרה ישירה של המודל
+# הגדרה של המודל
 model = genai.GenerativeModel('gemini-1.5-flash')
 
 st.set_page_config(page_title="BodyTrack AI", layout="wide")
 
+# עיצוב האתר ליישור לימין (RTL) וצבעים
 st.markdown("""
     <style>
-    .main { background-color: #0e1117; color: white; }
-    .stButton>button { width: 100%; border-radius: 10px; height: 3em; background-color: #00cc66; color: white; }
+    /* יישור כל האתר לימין */
+    .main, .stApp {
+        direction: RTL;
+        text-align: right;
+    }
+    
+    /* סידור כפתורים */
+    div.stButton > button {
+        width: 100%;
+        border-radius: 10px;
+        height: 3em;
+        background-color: #00cc66;
+        color: white;
+        border: none;
+    }
+    
+    /* תיקון כיוון ללשוניות (Tabs) */
+    .stTabs [data-baseweb="tab-list"] {
+        direction: RTL;
+        justify-content: flex-start;
+    }
+
+    /* יישור כותרות וטקסט */
+    h1, h2, h3, p, span, label, .stMarkdown {
+        text-align: right;
+        direction: RTL;
+    }
+    
+    /* תיקון מיקום האייקונים בהודעות */
+    .stAlert {
+        direction: RTL;
+        text-align: right;
+    }
+
+    /* תיקון לשדות קלט (מספרים וטקסט) */
+    .stNumberInput, .stTextInput, .stSelectbox {
+        direction: RTL;
+        text-align: right;
+    }
     </style>
     """, unsafe_allow_html=True)
 
