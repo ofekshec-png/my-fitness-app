@@ -90,11 +90,11 @@ with tab4:
     
         col_check, col_quote = st.columns([1, 2])
     
-    with col_check:
+        with col_check:
         workout_done = st.checkbox("יצאתי לאימון היום! 🏋️")
         ate_well = st.checkbox("אכלתי לפי התפריט 🍱")
         
-    with col_quote:
+        with col_quote:
         if workout_done:
             # בוחר משפט רנדומלי ומציג אותו בתוך תיבה יפה
             quote = random.choice(motivational_quotes)
