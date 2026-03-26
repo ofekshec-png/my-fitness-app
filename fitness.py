@@ -14,14 +14,24 @@ model = genai.GenerativeModel('gemini-1.5-flash')
 
 st.set_page_config(page_title="BodyTrack AI | Pro Edition", layout="wide")
 
-# עיצוב חדשני - Cyber Fitness Style
+# עיצוב מתקדם עם רקע נושם (Breathing Gradient) ויישור לימין
 st.markdown("""
     <style>
     /* הגדרות כלליות ויישור לימין */
     .main, .stApp {
         direction: RTL;
         text-align: right;
-        background-color: #050a0e;
+        /* רקע נושם - Breathing Gradient Background */
+        background: linear-gradient(135deg, #020202, #05141e, #020202);
+        background-size: 300% 300%;
+        animation: breathingGradient 15s ease infinite;
+    }
+    
+    /* הגדרת האנימציה לרקע */
+    @keyframes breathingGradient {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
     }
     
     /* עיצוב כותרת ראשית */
@@ -38,7 +48,7 @@ st.markdown("""
         background-color: transparent;
     }
     .stTabs [data-baseweb="tab"] {
-        background-color: #1a1f24;
+        background-color: rgba(26, 31, 36, 0.8);
         border-radius: 10px 10px 0px 0px;
         color: white;
         padding: 10px 20px;
@@ -73,7 +83,7 @@ st.markdown("""
 
     /* עיצוב תיבות הקלט */
     .stNumberInput, .stTextInput, .stSelectbox {
-        background-color: #1a1f24;
+        background-color: rgba(26, 31, 36, 0.8);
         border-radius: 8px;
     }
 
@@ -124,7 +134,8 @@ with tab2:
     with col_a:
         location = st.radio("מיקום האימון:", ["חדר כושר", "בית (משקל גוף)", "מתקני פארק"])
     with col_b:
-        goal = st.selectbox("מטרה עיקרית:", ["בניית שריר (Hypertrophy)", "כוח מתפרץ", "סיבולת"])
+        # עדכון כאן: הוספת אופציית חיטוב
+        goal = st.selectbox("מטרה עיקרית:", ["בניית שריר (Hypertrophy)", "כוח מתפרץ", "סיבולת", "חיטוב אגרסיבי (Cutting)"])
     
     # הסליידר עובד עכשיו בזכות התיקון ב-CSS
     days = st.slider("כמה ימים בשבוע להקדיש?", 1, 7, 3)
