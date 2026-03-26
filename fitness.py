@@ -11,7 +11,7 @@ genai.configure(api_key=API_KEY)
 # הגדרה ישירה של המודל כדי לעקוף את השגיאה בשרת
 model = genai.GenerativeModel('gemini-1.5-flash')
 
-st.set_page_config(page_title="BodyTrack AI", layout="wide")SSדדSS
+st.set_page_config(page_title="BodyTrack AI", layout="wide")
 
 st.markdown("""
     <style>
