@@ -76,29 +76,33 @@ with tab3:
 with tab4:
         st.header("📝 יומן מעקב ומוטיבציה")
         st.write(f"היום: {datetime.date.today()}")
-    
-        # רשימת משפטי מוטיבציה למסה ואימונים
-        motivational_quotes = [
-        "המסה של היום היא השריר של מחר! 💪",
-        "אל תפסיק כשאתה עייף, תפסיק כשסיימת. 🔥",
-        "כל חלבון נחשב, כל סט מקדם אותך למטרה. 🍗",
-        "הגוף שלך מסוגל להכל, זה רק הראש שצריך לשכנע. 🧠",
-        "זכור למה התחלת – המטרה קרובה מתמיד! 🎯",
-        "אין קיצורי דרך, יש רק עבודה קשה ותוצאות. ⚡",
-        "התמדה היא הסוד. פשוט תופיע לאימון. 🚀"
-    ]
-    
-        col_check, col_quote = st.columns([1, 2])
-    
-        with col_check:
-        workout_done = st.checkbox("יצאתי לאימון היום! 🏋️") # מוזז ימינה יחסית ל-with
-        ate_well = st.checkbox("אכלתי לפי התפריט 🍱")      # מוזז ימינה יחסית ל-with
+    # --- בתוך טאב 4 (יומן מעקב) ---
+    with tab4:
+        st.header("📝 יומן מעקב ומוטיבציה")
+        st.write(f"היום: {datetime.date.today()}")
         
-    with col_quote:
-        if workout_done:
-            quote = random.choice(motivational_quotes)   # מוזז ימינה יחסית ל-if
-            st.success(f"**כל הכבוד אלוף!** \n\n {quote}") # מוזז ימינה יחסית ל-if
-            st.balloons()                                # מוזז ימינה יחסית ל-if
+        motivational_quotes = [
+            "המסה של היום היא השריר של מחר! 💪",
+            "אל תפסיק כשאתה עייף, תפסיק כשסיימת. 🔥",
+            "כל חלבון נחשב, כל סט מקדם אותך למטרה. 🍗",
+            "הגוף שלך מסוגל להכל, זה רק הראש שצריך לשכנע. 🧠",
+            "זכור למה התחלת – המטרה קרובה מתמיד! 🎯",
+            "אין קיצורי דרך, יש רק עבודה קשה ותוצאות. ⚡",
+            "התמדה היא הסוד. פשוט תופיע לאימון. 🚀"
+        ]
+        
+        col_check, col_quote = st.columns([1, 2])
+        
+        with col_check:
+            workout_done = st.checkbox("יצאתי לאימון היום! 🏋️")
+            ate_well = st.checkbox("אכלתי לפי התפריט 🍱")
             
-            if st.button("שמור נתונים ביומן"):
+        with col_quote:
+            if workout_done:
+                quote = random.choice(motivational_quotes)
+                st.success(f"**כל הכבוד אלוף!** \n\n {quote}")
+                st.balloons()
+                
+        if st.button("שמור נתונים ביומן"):
             st.toast("הנתונים נשמרו בהצלחה!")
+ 
