@@ -3,7 +3,7 @@ import google.generativeai as genai
 from PIL import Image
 import datetime
 import time
-
+import random
 # הגדרות API
 API_KEY = "AIzaSyCii8GHxQdZ0DY9F1UxP9D42UWRt2bgfIc"
 genai.configure(api_key=API_KEY)
@@ -74,11 +74,34 @@ with tab3:
         elif bmi < 25: st.success("משקל תקין")
         else: st.info("עודף משקל")
 
+with tab4:# --- בתוך טאב 4 (יומן מעקב) ---
 with tab4:
-    st.header("צ'ק-ליסט יומי")
+    st.header("📝 יומן מעקב ומוטיבציה")
     st.write(f"היום: {datetime.date.today()}")
-    st.checkbox("ביצעתי אימון היום")
-    st.checkbox("הגעתי ליעד החלבון")
-    st.checkbox("שתיתי מספיק מים")
-    if st.button("שמור יומן"):
-        st.toast("הנתונים נשמרו!")
+    
+    # רשימת משפטי מוטיבציה למסה ואימונים
+    motivational_quotes = [
+        "המסה של היום היא השריר של מחר! 💪",
+        "אל תפסיק כשאתה עייף, תפסיק כשסיימת. 🔥",
+        "כל חלבון נחשב, כל סט מקדם אותך למטרה. 🍗",
+        "הגוף שלך מסוגל להכל, זה רק הראש שצריך לשכנע. 🧠",
+        "זכור למה התחלת – המטרה קרובה מתמיד! 🎯",
+        "אין קיצורי דרך, יש רק עבודה קשה ותוצאות. ⚡",
+        "התמדה היא הסוד. פשוט תופיע לאימון. 🚀"
+    ]
+    
+    col_check, col_quote = st.columns([1, 2])
+    
+    with col_check:
+        workout_done = st.checkbox("יצאתי לאימון היום! 🏋️")
+        ate_well = st.checkbox("אכלתי לפי התפריט 🍱")
+        
+    with col_quote:
+        if workout_done:
+            # בוחר משפט רנדומלי ומציג אותו בתוך תיבה יפה
+            quote = random.choice(motivational_quotes)
+            st.success(f"**כל הכבוד אלוף!** \n\n {quote}")
+            st.balloons() # מוסיף חגיגת בלונים על המסך
+            
+    if st.button("שמור נתונים ביומן"):
+        st.toast("הנתונים נשמרו בהצלחה!")
