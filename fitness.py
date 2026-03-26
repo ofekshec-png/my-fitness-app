@@ -90,7 +90,7 @@ with tab4:
     
         col_check, col_quote = st.columns([1, 2])
     
-       with col_check:
+        with col_check:
         workout_done = st.checkbox("יצאתי לאימון היום! 🏋️") # מוזז ימינה יחסית ל-with
         ate_well = st.checkbox("אכלתי לפי התפריט 🍱")      # מוזז ימינה יחסית ל-with
         
