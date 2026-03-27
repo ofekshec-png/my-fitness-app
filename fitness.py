@@ -9,8 +9,9 @@ try:
     if "GOOGLE_API_KEY" in st.secrets:
         API_KEY = st.secrets["GOOGLE_API_KEY"]
         genai.configure(api_key=API_KEY)
-        # פתרון ה-404: הגדרה ללא קידומת models/ ובדיקה אוטומטית
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        
+        # פתרון ה-404: יצירת המודל עם הגדרה מפורשת של הגרסה
+        model = genai.GenerativeModel(model_name='gemini-1.5-flash')
     else:
         st.error("Missing API Key in Secrets")
 except Exception as e:
@@ -18,7 +19,7 @@ except Exception as e:
 
 st.set_page_config(page_title="BodyTrack AI | Pro", layout="wide")
 
-# עיצוב RTL, רקע כהה ותיקון הסליידר והצ'קבוקסים
+# עיצוב RTL, רקע כהה ותיקון הסליידר
 st.markdown("""
     <style>
     .main, .stApp {
@@ -44,23 +45,24 @@ st.markdown("""
     }
     /* תיקון סליידר */
     .stSlider [data-baseweb="slider"] { direction: LTR !important; }
-    /* עיצוב צ'קבוקסים "מה עשיתי היום" */
+    /* עיצוב צ'קבוקסים */
     .stCheckbox label p { font-size: 1.2rem; font-weight: bold; color: #00ff88; }
     </style>
     """, unsafe_allow_html=True)
 
 def safe_generate(prompt_content):
     try:
+        # ניסיון ייצור תוכן
         response = model.generate_content(prompt_content)
         return response.text
     except Exception as e:
-        # אם יש שגיאת 404, מנסים שם מודל חלופי יציב (פרו)
+        # אם יש שגיאה, ננסה להשתמש בשם מודל חלופי
         try:
             alt_model = genai.GenerativeModel('gemini-pro')
             response = alt_model.generate_content(prompt_content)
             return response.text
         except:
-            return f"שגיאת תקשורת עם גוגל. חייב לבצע Delete ו-New App ב-Streamlit. {e}"
+            return f"שגיאת תקשורת עם גוגל. וודא שביצעת Delete ו-New App ב-Streamlit. {e}"
 
 st.title("⚡ BodyTrack AI Pro")
 tab1, tab2, tab3, tab4 = st.tabs(["🏋️ תוכנית אימון", "🥗 תפריט", "📊 מדדים", "✅ יומן ניצחונות"])
@@ -92,10 +94,10 @@ with tab3:
 with tab4:
     st.header("📝 מה עשיתי היום?")
     st.subheader(f"סטטוס ל-{datetime.date.today().strftime('%d/%m/%Y')}")
-    c1, c2 = st.columns(2)
+    c1, col2 = st.columns(2)
     with c1:
         workout = st.checkbox("סימון אימון: בוצע! 🏋️")
-    with c2:
+    with col2:
         food = st.checkbox("סימון תזונה: אכלתי לפי התפריט! 🍱")
     
     if workout and food:
