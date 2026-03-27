@@ -7,7 +7,7 @@ try:
     if "GOOGLE_API_KEY" in st.secrets:
         API_KEY = st.secrets["GOOGLE_API_KEY"]
         genai.configure(api_key=API_KEY)
-        # שימוש בשם המודל הבסיסי והיציב ביותר
+        # שימוש בשם המודל היציב ביותר למניעת שגיאת 404
         model = genai.GenerativeModel('gemini-1.5-flash')
     else:
         st.error("Missing API Key in Secrets")
@@ -47,7 +47,6 @@ st.markdown("""
 
 def safe_generate(prompt_content):
     try:
-        # יצירת תוכן ללא הגדרת גרסת API ידנית כדי לתת לספרייה לבחור את הכי יציב
         response = model.generate_content(prompt_content)
         return response.text
     except Exception as e:
