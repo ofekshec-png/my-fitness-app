@@ -10,8 +10,8 @@ try:
     if "GOOGLE_API_KEY" in st.secrets:
         API_KEY = st.secrets["GOOGLE_API_KEY"]
         genai.configure(api_key=API_KEY)
-        # תיקון השם לפורמט המלא כדי למנוע שגיאת 404
-        model = genai.GenerativeModel('models/gemini-1.5-flash')
+        # שימוש בשם המודל הכי מעודכן ויציב
+        model = genai.GenerativeModel('gemini-1.5-flash-latest')
     else:
         st.error("המפתח GOOGLE_API_KEY חסר ב-Secrets.")
 except Exception as e:
@@ -38,12 +38,12 @@ st.markdown("""
     .stTabs [data-baseweb="tab-list"] { gap: 10px; }
     .stTabs [data-baseweb="tab"] { background-color: rgba(26, 31, 36, 0.8); border-radius: 10px 10px 0px 0px; color: white; }
     .stTabs [aria-selected="true"] { background-color: #00ff88 !important; color: #050a0e !important; }
-    div.stButton > button { background: linear-gradient(90deg, #00ff88, #00cc66); color: #050a0e !important; font-weight: bold; border-radius: 12px; border: none; }
+    div.stButton > button { background: linear-gradient(90deg, #00ff88, #00cc66); color: black !important; font-weight: bold; border-radius: 12px; border: none; }
     .stSlider [data-baseweb="slider"] { direction: LTR; margin-top: 25px; }
     .stNumberInput, .stTextInput, .stSelectbox { background-color: rgba(26, 31, 36, 0.8); border-radius: 8px; }
     
-    /* תיקון צבע טקסט בכפתורים שיהיה שחור קריא */
-    .stButton>button { color: black !important; }
+    /* תיקון טקסט כפתורים */
+    .stButton>button p { color: black !important; font-weight: bold; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -60,7 +60,7 @@ def safe_generate(prompt_content):
                 return response.text
             except:
                 return "השרת של גוגל עמוס כרגע. נסה שוב בעוד דקה."
-        return f"שגיאה בייצור תוכן: {e}"
+        return f"שגיאה: {e}"
 
 st.title("⚡ BodyTrack AI Pro")
 tab1, tab2, tab3, tab4 = st.tabs(["📸 סורק ארוחות", "🏋️ תוכניות אימון", "📊 מדדים", "📝 יומן"])
