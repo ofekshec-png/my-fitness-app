@@ -4,19 +4,21 @@ from PIL import Image
 import datetime
 import time
 
-# הגדרת המפתח
+# הגדרת המפתח מתוך ה-Secrets
 try:
     if "GOOGLE_API_KEY" in st.secrets:
         API_KEY = st.secrets["GOOGLE_API_KEY"]
         genai.configure(api_key=API_KEY)
-        # תיקון השגיאה - שם המודל ללא קידומת models/
+        # שימוש בשם המודל המדויק לגרסה החדשה
         model = genai.GenerativeModel('gemini-1.5-flash')
     else:
         st.error("Missing API Key in Secrets")
 except Exception as e:
     st.error(f"Connection Error: {e}")
 
-# עיצוב האפליקציה (RTL וצבעים)
+st.set_page_config(page_title="BodyTrack AI | Pro", layout="wide")
+
+# עיצוב RTL, רקע נושם וכפתורי ניאון
 st.markdown("""
     <style>
     .main, .stApp {
@@ -25,14 +27,11 @@ st.markdown("""
         background-color: #050a0e;
         color: white;
     }
-    h1 { color: #00ff88; }
-    .stTabs [data-baseweb="tab-list"] { 
-        direction: RTL; 
-        gap: 10px;
-    }
+    h1 { color: #00ff88; font-weight: 800; }
+    .stTabs [data-baseweb="tab-list"] { direction: RTL; gap: 10px; }
     .stTabs [data-baseweb="tab"] {
         background-color: rgba(26, 31, 36, 0.8);
-        border-radius: 8px;
+        border-radius: 10px 10px 0px 0px;
         color: white;
         padding: 10px;
     }
@@ -42,12 +41,25 @@ st.markdown("""
         font-weight: bold;
     }
     .stButton>button { 
-        background-color: #00ff88 !important; 
+        background: linear-gradient(90deg, #00ff88, #00cc66);
         color: black !important; 
-        width: 100%;
-        border-radius: 10px;
         font-weight: bold;
+        border-radius: 12px;
+        border: none;
+        width: 100%;
     }
+    
+    /* תיקון הסליידר - מכריחים אותו ליישור לשמאל כדי שלא יברח מהטווח */
+    .stSlider [data-baseweb="slider"] {
+        direction: LTR !important;
+        text-align: left !important;
+        margin-left: 20px !important;
+        margin-right: 0 !important;
+        width: 95% !important;
+    }
+    /* תיקון צבע הכיתוב על הסליידר שיהיה קריא */
+    .stSlider p { color: white !important; }
+    
     /* תיקון צבע פונט בתיבת הבחירה */
     .stSelectbox label { color: white; }
     .stSelectbox > div { background-color: rgba(26, 31, 36, 0.8); }
@@ -56,43 +68,59 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-st.title("⚡ BodyTrack AI Pro")
+# פונקציית ייצור תוכן עם טיפול בשגיאות
+def safe_generate(prompt_content):
+    try:
+        response = model.generate_content(prompt_content)
+        if response and response.text:
+            return response.text
+        return "לא התקבלה תשובה מהמודל."
+    except Exception as e:
+        if "429" in str(e):
+            time.sleep(2)
+            try:
+                response = model.generate_content(prompt_content)
+                return response.text
+            except:
+                return "עומס כבד בשרתי גוגל. נסה שוב בעוד דקה."
+        return f"שגיאה בייצור התוכן: {e}"
 
+st.title("⚡ BodyTrack AI Pro")
 tab1, tab2, tab3 = st.tabs(["🏋️ תוכנית אימון", "🥗 תפריט", "📊 מדדים"])
 
 with tab1:
-    st.header("בניית תוכנית אימון")
+    st.header("בניית תוכנית אימון אישית")
     location = st.radio("מיקום:", ["חדר כושר", "בית (משקל גוף)", "פארק"])
-    goal = st.selectbox("מטרה:", ["בניית שריר", "חיטוב אגרסיבי", "כוח מתפרץ"])
+    goal = st.selectbox("מטרה עיקרית:", ["בניית שריר (Hypertrophy)", "חיטוב אגרסיבי", "כוח מתפרץ"])
+    # הסליידר המתוקן
     days = st.slider("ימים בשבוע:", 1, 7, 3)
     
     if st.button("בנה לי תוכנית"):
         with st.spinner('ה-AI חושב על אימונים...'):
-            try:
-                response = model.generate_content(f"צור תוכנית אימון ל{goal} ב{location} למשך {days} ימים בשבוע. עברית.")
-                st.write(response.text)
-            except Exception as e:
-                st.error(f"שגיאה בייצור התוכן: {e}")
+            res_text = safe_generate(f"Workout plan for {goal} at {location} for {days} days. Hebrew.")
+            if "שגיאה" in res_text:
+                st.error(res_text)
+            else:
+                st.markdown(res_text)
 
 with tab2:
     st.header("🥗 תפריט מותאם")
-    target = st.selectbox("מה המטרה שלך?", ["מסה נקייה", "חיטוב אגרסיבי"])
+    target = st.selectbox("מה המטרה התזונתית שלך?", ["מסה נקייה", "חיטוב אגרסיבי"])
     if st.button("צור תפריט עכשיו"):
         with st.spinner('בונה תפריט...'):
-            try:
-                response = model.generate_content(f"צור תפריט יומי ל{target} עם חלבון גבוה. עברית.")
-                st.success(response.text)
-            except Exception as e:
-                st.error(f"גוגל עמוסה. {e}")
+            res_text = safe_generate(f"צור תפריט יומי ל{target} עם חלבון גבוה. ענה בעברית.")
+            if "שגיאה" in res_text:
+                st.error(res_text)
+            else:
+                st.success(res_text)
 
 with tab3:
     st.header("📊 מחשבון מדדים")
-    # תיקון השגיאה: שימוש בגרשיים בודדים
-    weight = st.number_input('משקל בק"ג', 30, 200, 70)
+    weight = st.number_input('משקלבק"ג', 30.0, 200.0, 70.0)
     height = st.number_input('גובה בס"מ', 100, 250, 180)
     if height > 0:
         bmi = weight / ((height/100)**2)
-        st.metric("ה-BMI שלך", round(bmi, 1))
+        st.metric("ה-BMI שלך", f"{bmi:.1f}")
         if bmi < 18.5: st.warning("תת משקל. צריך לאכול!")
         elif bmi < 25: st.success("תקין! כל הכבוד.")
         else: st.info("עודף משקל. זמן לחיטוב.")
