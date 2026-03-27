@@ -6,9 +6,9 @@ import datetime
 try:
     if "GOOGLE_API_KEY" in st.secrets:
         API_KEY = st.secrets["GOOGLE_API_KEY"]
-        genai.configure(api_key=API_KEY)
-        # שימוש בשם המודל היציב ביותר למניעת שגיאת 404
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        # כאן המעקף: אנחנו מגדירים את ה-API לעבוד עם גרסה v1 ולא v1beta
+        genai.configure(api_key=API_KEY, transport='rest')
+        model = genai.GenerativeModel('models/gemini-1.5-flash')
     else:
         st.error("Missing API Key in Secrets")
 except Exception as e:
@@ -41,16 +41,16 @@ st.markdown("""
         width: 100%;
     }
     .stSlider [data-baseweb="slider"] { direction: LTR !important; }
-    .stCheckbox label p { font-size: 1.2rem; font-weight: bold; color: #00ff88; }
     </style>
     """, unsafe_allow_html=True)
 
 def safe_generate(prompt_content):
     try:
+        # הוספת הגדרה מפורשת כדי למנוע קריסה
         response = model.generate_content(prompt_content)
         return response.text
     except Exception as e:
-        return f"שגיאה בייצור התוכן: {e}"
+        return f"שגיאה: {e}"
 
 st.title("⚡ BodyTrack AI Pro")
 tab1, tab2, tab3, tab4 = st.tabs(["🏋️ תוכנית אימון", "🥗 תפריט", "📊 מדדים", "✅ יומן ניצחונות"])
@@ -62,14 +62,16 @@ with tab1:
     days = st.slider("ימים בשבוע:", 1, 7, 3)
     if st.button("בנה לי תוכנית"):
         with st.spinner('ה-AI חושב...'):
-            st.markdown(safe_generate(f"Create a workout plan for {goal} at {location} for {days} days. Hebrew."))
+            res = safe_generate(f"Create a workout plan for {goal} at {location} for {days} days. Hebrew.")
+            st.markdown(res)
 
 with tab2:
     st.header("🥗 תפריט מותאם")
     target = st.selectbox("מטרה תזונתית:", ["מסה", "חיטוב"])
     if st.button("צור תפריט"):
         with st.spinner('בונה תפריט...'):
-            st.success(safe_generate(f"צור תפריט יומי ל{target} עם חלבון גבוה. עברית."))
+            res = safe_generate(f"צור תפריט יומי ל{target} עם חלבון גבוה. עברית.")
+            st.success(res)
 
 with tab3:
     st.header("📊 מחשבון מדדים")
@@ -82,12 +84,8 @@ with tab3:
 with tab4:
     st.header("📝 מה עשיתי היום?")
     st.subheader(f"סטטוס ל-{datetime.date.today().strftime('%d/%m/%Y')}")
-    c1, c2 = st.columns(2)
-    with c1:
-        workout = st.checkbox("סימון אימון: בוצע! 🏋️")
-    with c2:
-        food = st.checkbox("סימון תזונה: אכלתי לפי התפריט! 🍱")
-    
+    workout = st.checkbox("סימון אימון: בוצע! 🏋️")
+    food = st.checkbox("סימון תזונה: אכלתי לפי התפריט! 🍱")
     if workout and food:
         st.balloons()
-        st.success("יום מושלם! אתה בדרך למטרה אלוף.")
+        st.success("יום מושלם! אלוף.")
