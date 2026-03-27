@@ -7,7 +7,7 @@ try:
     if "GOOGLE_API_KEY" in st.secrets:
         API_KEY = st.secrets["GOOGLE_API_KEY"]
         genai.configure(api_key=API_KEY, transport='rest')
-        model = genai.GenerativeModel('gemini-2.0-flash')  # עודכן מ-1.5-flash
+        model = genai.GenerativeModel('gemini-2.0-flash-lite')  # עודכן מ-1.5-flash
     else:
         st.error("Missing API Key in Secrets")
 except Exception as e:
