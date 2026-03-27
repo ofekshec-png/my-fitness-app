@@ -3,119 +3,68 @@ import google.generativeai as genai
 from PIL import Image
 import datetime
 import time
-import random
 
-# הגדרת המפתח מתוך ה-Secrets
+# הגדרת המפתח
 try:
     if "GOOGLE_API_KEY" in st.secrets:
         API_KEY = st.secrets["GOOGLE_API_KEY"]
         genai.configure(api_key=API_KEY)
-        # שימוש בשם המודל הכי בסיסי - זה הפתרון ל-404
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        
+        # שיטת המעקף: הגדרת המודל עם שם מפורש וגרסה
+        model = genai.GenerativeModel(model_name='gemini-1.5-flash')
     else:
-        st.error("המפתח GOOGLE_API_KEY חסר ב-Secrets.")
+        st.error("Missing API Key in Secrets")
 except Exception as e:
-    st.error(f"שגיאה בחיבור: {e}")
+    st.error(f"Connection Error: {e}")
 
-st.set_page_config(page_title="BodyTrack AI | Pro", layout="wide")
-
-# עיצוב RTL, רקע נושם וכפתורי ניאון
+# עיצוב האפליקציה (RTL וצבעים)
 st.markdown("""
     <style>
     .main, .stApp {
         direction: RTL;
         text-align: right;
-        background: linear-gradient(135deg, #020202, #05141e, #020202);
-        background-size: 300% 300%;
-        animation: breathingGradient 15s ease infinite;
+        background-color: #050a0e;
+        color: white;
     }
-    @keyframes breathingGradient {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
+    h1 { color: #00ff88; }
+    .stButton>button { 
+        background-color: #00ff88 !important; 
+        color: black !important; 
+        width: 100%;
+        border-radius: 10px;
+        font-weight: bold;
     }
-    h1 { color: #00ff88; text-shadow: 0px 0px 15px rgba(0, 255, 136, 0.5); font-weight: 800; }
-    .stTabs [data-baseweb="tab-list"] { gap: 10px; }
-    .stTabs [data-baseweb="tab"] { background-color: rgba(26, 31, 36, 0.8); border-radius: 10px 10px 0px 0px; color: white; }
-    .stTabs [aria-selected="true"] { background-color: #00ff88 !important; color: #050a0e !important; }
-    div.stButton > button { background: linear-gradient(90deg, #00ff88, #00cc66); color: black !important; font-weight: bold; border-radius: 12px; border: none; }
-    .stSlider [data-baseweb="slider"] { direction: LTR; margin-top: 25px; }
-    .stNumberInput, .stTextInput, .stSelectbox { background-color: rgba(26, 31, 36, 0.8); border-radius: 8px; }
-    
-    /* תיקון טקסט כפתורים */
-    .stButton>button p { color: black !important; font-weight: bold; }
+    .stTabs [data-baseweb="tab-list"] { direction: RTL; }
     </style>
     """, unsafe_allow_html=True)
 
-# פונקציית ייצור תוכן עם טיפול בשגיאות
-def safe_generate(prompt_content):
-    try:
-        # פנייה למודל - שימוש ב-generate_content הפשוט
-        response = model.generate_content(prompt_content)
-        if response and response.text:
-            return response.text
-        return "לא התקבלה תשובה מהמודל."
-    except Exception as e:
-        # אם יש שגיאת עומס (429), ננסה פעם אחת נוספת
-        if "429" in str(e):
-            time.sleep(2)
-            try:
-                response = model.generate_content(prompt_content)
-                return response.text
-            except:
-                return "עומס כבד בשרתי גוגל. נסה שוב בעוד דקה."
-        return f"שגיאה: {e}"
-
 st.title("⚡ BodyTrack AI Pro")
-tab1, tab2, tab3, tab4 = st.tabs(["📸 סורק ארוחות", "🏋️ תוכניות אימון", "📊 מדדים", "📝 יומן"])
+
+tab1, tab2, tab3 = st.tabs(["🏋️ תוכנית אימון", "🥗 תפריט", "📊 מדדים"])
 
 with tab1:
-    col1, col2 = st.columns(2)
-    with col1:
-        st.header("🔍 ניתוח ארוחה")
-        uploaded_file = st.file_uploader("העלה תמונה", type=["jpg", "png"])
-        if uploaded_file:
-            image = Image.open(uploaded_file)
-            st.image(image, use_column_width=True)
-            if st.button("נתח ערכים"):
-                with st.spinner('מנתח את הצלחת...'):
-                    res_text = safe_generate(["Analyze this meal. Provide Calories, Protein, Carbs, Fats. Respond in Hebrew.", image])
-                    st.info(res_text)
-    with col2:
-        st.header("🥗 תפריט מותאם")
-        target = st.selectbox("מטרה תזונתית:", ["מסה נקייה", "מסה מלוכלכת", "חיטוב אגרסיבי"])
-        if st.button("צור תפריט"):
-            with st.spinner('בונה תפריט...'):
-                res_text = safe_generate(f"צור תפריט יומי מפורט ל{target} עם דגש על חלבון גבוה. ענה בעברית.")
-                st.success(res_text)
+    st.header("בניית תוכנית אימון")
+    goal = st.selectbox("מטרה:", ["בניית שריר", "חיטוב", "כוח"])
+    days = st.slider("ימים בשבוע:", 1, 7, 3)
+    
+    if st.button("בנה לי תוכנית"):
+        with st.spinner('ה-AI חושב...'):
+            try:
+                # כאן אנחנו מנסים לייצר תוכן
+                response = model.generate_content(f"צור תוכנית אימון ל{goal} למשך {days} ימים בשבוע. עברית.")
+                st.write(response.text)
+            except Exception as e:
+                # אם עדיין יש שגיאה, נציג אותה בצורה ברורה
+                st.error(f"שגיאה בייצור התוכן: {e}")
 
 with tab2:
-    st.header("⚡ תוכנית אימון אישית")
-    c_a, c_b = st.columns(2)
-    with c_a: loc = st.radio("מיקום האימון:", ["חדר כושר", "בית (משקל גוף)", "פארק"])
-    with c_b: goal = st.selectbox("מטרה עיקרית:", ["בניית שריר (Hypertrophy)", "כוח מתפרץ", "סיבולת", "חיטוב אגרסיבי"])
-    days = st.slider("כמה ימים בשבוע?", 1, 7, 3)
-    if st.button("בנה תוכנית"):
-        with st.spinner('מעבד תוכנית אימונים...'):
-            res_text = safe_generate(f"Create a workout plan for {goal} at {loc} for {days} days. Hebrew.")
-            st.markdown(res_text)
+    st.header("ניתוח תזונה")
+    st.info("כאן תוכל להזין מה אכלת היום")
 
 with tab3:
-    st.header("📊 מחשבון מדדים")
-    w = st.number_input("משקל (kg)", 30.0, 200.0, 70.0)
-    h = st.number_input("גובה (cm)", 100, 250, 180)
-    if h > 0:
-        bmi = w / ((h/100)**2)
-        st.metric("ה-BMI שלך", f"{bmi:.1f}")
-        if bmi < 18.5: st.warning("תת משקל - צריך לאכול יותר!")
-        elif bmi < 25: st.success("משקל תקין - כל הכבוד!")
-        else: st.info("עודף משקל - זמן לחיטוב?")
-
-with tab4:
-    st.header("📝 יומן ניצחונות")
-    st.write(f"תאריך: {datetime.date.today()}")
-    workout_done = st.checkbox("סיימתי אימון היום! ✅")
-    ate_well = st.checkbox("עמדתי בתפריט! 🍱")
-    if workout_done:
-        st.balloons()
-        st.success("אלוף! כל אימון מקדם אותך למטרה.")
+    st.header("מחשבון BMI")
+    weight = st.number_input("משקל בק"ג", 30, 200, 70)
+    height = st.number_input("גובה בס"מ", 100, 250, 180)
+    if height > 0:
+        bmi = weight / ((height/100)**2)
+        st.metric("ה-BMI שלך", round(bmi, 1))
