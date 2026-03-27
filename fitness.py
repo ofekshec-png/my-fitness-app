@@ -9,8 +9,7 @@ try:
     if "GOOGLE_API_KEY" in st.secrets:
         API_KEY = st.secrets["GOOGLE_API_KEY"]
         genai.configure(api_key=API_KEY)
-        
-        # שיטת המעקף הסופית: מנסים לקרוא למודל ללא קידומת ובודקים זמינות
+        # שימוש בשם מודל נקי ללא קידומות
         model = genai.GenerativeModel('gemini-1.5-flash')
     else:
         st.error("Missing API Key in Secrets")
@@ -19,7 +18,7 @@ except Exception as e:
 
 st.set_page_config(page_title="BodyTrack AI | Pro", layout="wide")
 
-# עיצוב RTL, רקע כהה ותיקון הסליידר
+# עיצוב RTL ותיקון הסליידר והצ'קבוקסים
 st.markdown("""
     <style>
     .main, .stApp {
@@ -34,12 +33,8 @@ st.markdown("""
         background-color: rgba(26, 31, 36, 0.8);
         border-radius: 10px 10px 0px 0px;
         color: white;
-        padding: 10px;
     }
-    .stTabs [aria-selected="true"] {
-        background-color: #00ff88 !important;
-        color: black !important;
-    }
+    .stTabs [aria-selected="true"] { background-color: #00ff88 !important; color: black !important; }
     .stButton>button { 
         background: linear-gradient(90deg, #00ff88, #00cc66);
         color: black !important; 
@@ -47,57 +42,44 @@ st.markdown("""
         border-radius: 12px;
         width: 100%;
     }
-    
-    /* תיקון סופי לסליידר - מניעת בריחה מהמסך */
-    .stSlider {
-        margin-top: 20px;
-        margin-bottom: 20px;
-    }
-    .stSlider [data-baseweb="slider"] {
-        direction: LTR !important;
-    }
-    
-    .stSelectbox label, .stRadio label { color: white !important; }
+    /* תיקון סופי לסליידר שלא יברח מהטווח */
+    .stSlider [data-baseweb="slider"] { direction: LTR !important; }
+    /* עיצוב לצ'קבוקסים של המעקב */
+    .stCheckbox label p { font-size: 1.2rem; font-weight: bold; color: #00ff88; }
     </style>
     """, unsafe_allow_html=True)
 
 def safe_generate(prompt_content):
     try:
-        # הוספת הגדרת גירסת בטא ליתר ביטחון בתוך הקריאה
         response = model.generate_content(prompt_content)
         return response.text
     except Exception as e:
-        # אם יש שגיאת 404, ננסה להשתמש בשם מודל ישן יותר כגיבוי
-        if "404" in str(e):
-            try:
-                legacy_model = genai.GenerativeModel('gemini-pro')
-                response = legacy_model.generate_content(prompt_content)
-                return response.text
-            except:
-                return f"שגיאת תקשורת עם גוגל. נסה לעשות Reboot לאפליקציה ב-Streamlit. {e}"
-        return f"שגיאה: {e}"
+        # אם יש שגיאת 404, מנסים שם מודל חלופי יציב
+        try:
+            alt_model = genai.GenerativeModel('gemini-pro')
+            response = alt_model.generate_content(prompt_content)
+            return response.text
+        except:
+            return f"שגיאת תקשורת עם גוגל. נסה לעשות Reboot לאפליקציה. {e}"
 
 st.title("⚡ BodyTrack AI Pro")
-tab1, tab2, tab3 = st.tabs(["🏋️ תוכנית אימון", "🥗 תפריט", "📊 מדדים"])
+tab1, tab2, tab3, tab4 = st.tabs(["🏋️ תוכנית אימון", "🥗 תפריט", "📊 מדדים", "✅ מעקב יומי"])
 
 with tab1:
-    st.header("בניית תוכנית אימון אישית")
+    st.header("בניית תוכנית אימון")
     location = st.radio("מיקום:", ["חדר כושר", "בית (משקל גוף)", "פארק"])
-    goal = st.selectbox("מטרה עיקרית:", ["בניית שריר", "חיטוב אגרסיבי", "כוח מתפרץ"])
+    goal = st.selectbox("מטרה:", ["בניית שריר", "חיטוב אגרסיבי", "כוח מתפרץ"])
     days = st.slider("ימים בשבוע:", 1, 7, 3)
-    
     if st.button("בנה לי תוכנית"):
-        with st.spinner('ה-AI מעבד נתונים...'):
-            res = safe_generate(f"Create a workout plan for {goal} at {location} for {days} days. Hebrew.")
-            st.markdown(res)
+        with st.spinner('ה-AI חושב...'):
+            st.markdown(safe_generate(f"Create a workout plan for {goal} at {location} for {days} days. Hebrew."))
 
 with tab2:
     st.header("🥗 תפריט מותאם")
-    target = st.selectbox("מה המטרה שלך?", ["מסה נקייה", "חיטוב"])
-    if st.button("צור תפריט עכשיו"):
+    target = st.selectbox("מטרה תזונתית:", ["מסה", "חיטוב"])
+    if st.button("צור תפריט"):
         with st.spinner('בונה תפריט...'):
-            res = safe_generate(f"צור תפריט יומי ל{target} עם חלבון גבוה. עברית.")
-            st.success(res)
+            st.success(safe_generate(f"צור תפריט יומי ל{target} עם חלבון גבוה. עברית."))
 
 with tab3:
     st.header("📊 מחשבון מדדים")
@@ -106,3 +88,16 @@ with tab3:
     if height > 0:
         bmi = weight / ((height/100)**2)
         st.metric("ה-BMI שלך", f"{bmi:.1f}")
+
+with tab4:
+    st.header("📝 יומן ניצחונות")
+    st.subheader(f"סטטוס להיום: {datetime.date.today().strftime('%d/%m/%Y')}")
+    c1, c2 = st.columns(2)
+    with c1:
+        workout = st.checkbox("סימון אימון: בוצע! 🏋️")
+    with c2:
+        food = st.checkbox("סימון תזונה: אכלתי לפי התפריט! 🍱")
+    
+    if workout and food:
+        st.balloons()
+        st.success("יום מושלם! אתה בדרך למטרה.")
