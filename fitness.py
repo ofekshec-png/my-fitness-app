@@ -2,18 +2,19 @@ import streamlit as st
 import google.generativeai as genai
 import datetime
 
-# הגדרת המפתח מתוך ה-Secrets
+# הגדרת המפתח מתוך ה-Secrets עם מעקף transport
 try:
     if "GOOGLE_API_KEY" in st.secrets:
         API_KEY = st.secrets["GOOGLE_API_KEY"]
-        genai.configure(api_key=API_KEY)
+        # transport='rest' הוא המפתח לביטול שגיאת ה-404 ב-Streamlit
+        genai.configure(api_key=API_KEY, transport='rest')
         model = genai.GenerativeModel('gemini-1.5-flash')
     else:
         st.error("Missing API Key in Secrets")
 except Exception as e:
     st.error(f"Connection Error: {e}")
 
-# הגדרות עמוד ועיצוב RTL
+# עיצוב RTL וסגנון כהה
 st.set_page_config(page_title="BodyTrack AI | Pro", layout="wide")
 
 st.markdown("""
@@ -26,7 +27,7 @@ st.markdown("""
         background-color: #050a0e;
         color: white;
     }
-    .stTabs [data-baseweb="tab-list"] { direction: RTL; gap: 10px; }
+    .stTabs [data-baseweb="tab-list"] { direction: RTL; gap: 10px; justify-content: center; }
     h1, h2, h3, p, span, label { text-align: right !important; direction: RTL !important; }
     .stButton>button {
         background: linear-gradient(90deg, #00ff88, #00cc66);
@@ -40,41 +41,40 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-def safe_generate(prompt_content):
-    try:
-        response = model.generate_content(prompt_content)
-        return response.text
-    except Exception as e:
-        return f"שגיאה: {e}"
-
 st.title("⚡ BodyTrack AI Pro")
 
-# בחירת מגדר גלובלית שתשפיע על הכל
-gender = st.sidebar.radio("מין:", ["גבר", "אישה"])
-st.sidebar.divider()
-st.sidebar.info(f"התוכנית תותאם ל{gender}")
-
+# טאבים
 tab1, tab2, tab3, tab4 = st.tabs(["🏋️ תוכנית אימון", "🥗 תפריט", "📊 מדדים", "✅ יומן ניצחונות"])
 
 with tab1:
     st.header("בניית תוכנית אימון")
-    location = st.radio("איפה מתאמנים?", ["חדר כושר", "בית (משקל גוף)", "פארק / גינת כושר"])
+    gender = st.radio("מין:", ["גבר", "אישה"], horizontal=True, key="gen_work")
+    location = st.radio("איפה מתאמנים?", ["חדר כושר", "בית (משקל גוף)", "פארק / גינת כושר"], horizontal=True)
     goal = st.selectbox("מה המטרה?", ["בניית מסת שריר", "חיטוב אגרסיבי", "כוח מתפרץ"])
     days = st.slider("כמה ימים בשבוע?", 1, 7, 3)
     
     if st.button("בנה לי תוכנית אימון"):
-        with st.spinner('מעבד נתונים...'):
-            prompt = f"צור תוכנית אימון ל{gender} למטרת {goal} ב{location} למשך {days} ימים בשבוע. כתוב בעברית."
-            st.markdown(safe_generate(prompt))
+        with st.spinner('בונה תוכנית אישית...'):
+            prompt = f"צור תוכנית אימון ל{gender} למטרת {goal} ב{location} למשך {days} ימים בשבוע. כתוב בעברית ברורה."
+            try:
+                response = model.generate_content(prompt)
+                st.markdown(response.text)
+            except Exception as e:
+                st.error(f"שגיאה: {e}")
 
 with tab2:
     st.header("🥗 תפריט תזונה")
+    gender_nut = st.radio("מין:", ["גבר", "אישה"], horizontal=True, key="gen_nut")
     target = st.selectbox("בחר יעד תזונתי:", ["מסה", "חיטוב", "תחזוקה"])
     
     if st.button("צור תפריט יומי"):
         with st.spinner('מחשב קלוריות...'):
-            prompt = f"צור תפריט יומי ל{gender} למטרת {target}. תתחשב בצרכים הקלוריים של {gender}. עברית."
-            st.success(safe_generate(prompt))
+            prompt = f"צור תפריט יומי ל{gender_nut} למטרת {target}. תתחשב בצרכים הקלוריים של {gender_nut}. עברית."
+            try:
+                response = model.generate_content(prompt)
+                st.success(response.text)
+            except Exception as e:
+                st.error(f"שגיאה: {e}")
 
 with tab3:
     st.header("📊 מחשבון BMI")
@@ -99,4 +99,4 @@ with tab4:
     
     if w_done and f_done:
         st.balloons()
-        st.success("אלוף! יום מושלם.")
+        st.success("אלוף! יום מושלם בדרך למטרה.")
