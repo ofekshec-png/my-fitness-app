@@ -1,56 +1,40 @@
 import streamlit as st
-import google.generativeai as genai
+import requests
 import datetime
 
 # הגדרת המפתח מתוך ה-Secrets
-try:
-    if "GOOGLE_API_KEY" in st.secrets:
-        API_KEY = st.secrets["GOOGLE_API_KEY"]
-        # כאן המעקף: אנחנו מגדירים את ה-API לעבוד עם גרסה v1 ולא v1beta
-        genai.configure(api_key=API_KEY, transport='rest')
-        model = genai.GenerativeModel('models/gemini-1.5-flash')
-    else:
-        st.error("Missing API Key in Secrets")
-except Exception as e:
-    st.error(f"Connection Error: {e}")
+API_KEY = st.secrets.get("GOOGLE_API_KEY")
 
 st.set_page_config(page_title="BodyTrack AI | Pro", layout="wide")
 
 # עיצוב RTL וסגנון כהה
 st.markdown("""
     <style>
-    .main, .stApp {
-        direction: RTL;
-        text-align: right;
-        background-color: #050a0e;
-        color: white;
-    }
+    .main, .stApp { direction: RTL; text-align: right; background-color: #050a0e; color: white; }
     h1 { color: #00ff88; font-weight: 800; }
-    .stTabs [data-baseweb="tab-list"] { direction: RTL; gap: 10px; }
-    .stTabs [data-baseweb="tab"] {
-        background-color: rgba(26, 31, 36, 0.8);
-        border-radius: 10px 10px 0px 0px;
-        color: white;
-    }
-    .stTabs [aria-selected="true"] { background-color: #00ff88 !important; color: black !important; }
-    .stButton>button { 
-        background: linear-gradient(90deg, #00ff88, #00cc66);
-        color: black !important; 
-        font-weight: bold;
-        border-radius: 12px;
-        width: 100%;
-    }
-    .stSlider [data-baseweb="slider"] { direction: LTR !important; }
+    .stTabs [data-baseweb="tab-list"] { direction: RTL; }
+    .stButton>button { background: linear-gradient(90deg, #00ff88, #00cc66); color: black !important; font-weight: bold; width: 100%; border-radius: 12px; }
     </style>
     """, unsafe_allow_html=True)
 
-def safe_generate(prompt_content):
+def generate_with_api(prompt_text):
+    if not API_KEY:
+        return "שגיאה: מפתח API חסר ב-Secrets"
+    
+    # המעקף הסופי: פנייה ישירה לכתובת ה-API הרשמית (v1 ולא v1beta)
+    url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={API_KEY}"
+    headers = {'Content-Type': 'application/json'}
+    payload = {
+        "contents": [{"parts": [{"text": prompt_text}]}]
+    }
+    
     try:
-        # הוספת הגדרה מפורשת כדי למנוע קריסה
-        response = model.generate_content(prompt_content)
-        return response.text
+        response = requests.post(url, headers=headers, json=payload)
+        response.raise_for_status()
+        data = response.json()
+        return data['candidates'][0]['content']['parts'][0]['text']
     except Exception as e:
-        return f"שגיאה: {e}"
+        return f"שגיאה בחיבור ל-AI: {str(e)}"
 
 st.title("⚡ BodyTrack AI Pro")
 tab1, tab2, tab3, tab4 = st.tabs(["🏋️ תוכנית אימון", "🥗 תפריט", "📊 מדדים", "✅ יומן ניצחונות"])
@@ -61,8 +45,8 @@ with tab1:
     goal = st.selectbox("מטרה:", ["בניית שריר", "חיטוב אגרסיבי", "כוח מתפרץ"])
     days = st.slider("ימים בשבוע:", 1, 7, 3)
     if st.button("בנה לי תוכנית"):
-        with st.spinner('ה-AI חושב...'):
-            res = safe_generate(f"Create a workout plan for {goal} at {location} for {days} days. Hebrew.")
+        with st.spinner('מייצר תוכנית...'):
+            res = generate_with_api(f"Create a workout plan for {goal} at {location} for {days} days. Hebrew.")
             st.markdown(res)
 
 with tab2:
@@ -70,7 +54,7 @@ with tab2:
     target = st.selectbox("מטרה תזונתית:", ["מסה", "חיטוב"])
     if st.button("צור תפריט"):
         with st.spinner('בונה תפריט...'):
-            res = safe_generate(f"צור תפריט יומי ל{target} עם חלבון גבוה. עברית.")
+            res = generate_with_api(f"צור תפריט יומי ל{target} עם חלבון גבוה. עברית.")
             st.success(res)
 
 with tab3:
@@ -84,8 +68,12 @@ with tab3:
 with tab4:
     st.header("📝 מה עשיתי היום?")
     st.subheader(f"סטטוס ל-{datetime.date.today().strftime('%d/%m/%Y')}")
-    workout = st.checkbox("סימון אימון: בוצע! 🏋️")
-    food = st.checkbox("סימון תזונה: אכלתי לפי התפריט! 🍱")
+    col1, col2 = st.columns(2)
+    with col1:
+        workout = st.checkbox("סימון אימון: בוצע! 🏋️")
+    with col2:
+        food = st.checkbox("סימון תזונה: אכלתי לפי התפריט! 🍱")
+    
     if workout and food:
         st.balloons()
         st.success("יום מושלם! אלוף.")
