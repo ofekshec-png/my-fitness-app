@@ -9,8 +9,6 @@ try:
     if "GOOGLE_API_KEY" in st.secrets:
         API_KEY = st.secrets["GOOGLE_API_KEY"]
         genai.configure(api_key=API_KEY)
-        
-        # שיטת המעקף: הגדרת המודל עם שם מפורש וגרסה
         model = genai.GenerativeModel(model_name='gemini-1.5-flash')
     else:
         st.error("Missing API Key in Secrets")
@@ -50,11 +48,9 @@ with tab1:
     if st.button("בנה לי תוכנית"):
         with st.spinner('ה-AI חושב...'):
             try:
-                # כאן אנחנו מנסים לייצר תוכן
                 response = model.generate_content(f"צור תוכנית אימון ל{goal} למשך {days} ימים בשבוע. עברית.")
                 st.write(response.text)
             except Exception as e:
-                # אם עדיין יש שגיאה, נציג אותה בצורה ברורה
                 st.error(f"שגיאה בייצור התוכן: {e}")
 
 with tab2:
@@ -63,8 +59,9 @@ with tab2:
 
 with tab3:
     st.header("מחשבון BMI")
-    weight = st.number_input("משקל בק"ג", 30, 200, 70)
-    height = st.number_input("גובה בס"מ", 100, 250, 180)
+    # תיקון השגיאה: שימוש בגרשיים בודדים כדי שהגרשיים של ק"ג לא יהרסו את הקוד
+    weight = st.number_input('משקל בק"ג', 30, 200, 70)
+    height = st.number_input('גובה בס"מ', 100, 250, 180)
     if height > 0:
         bmi = weight / ((height/100)**2)
         st.metric("ה-BMI שלך", round(bmi, 1))
