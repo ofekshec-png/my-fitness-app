@@ -7,12 +7,14 @@ import random
 
 # הגדרת המפתח מתוך ה-Secrets של Streamlit
 API_KEY = st.secrets["GOOGLE_API_KEY"]
-genai.configure(api_key=API_KEY)
-
-# הגדרה של המודל
-model = genai.GenerativeModel('gemini-1.5-flash')
-
-st.set_page_config(page_title="BodyTrack AI | Pro Edition", layout="wide")
+# הגדרת המפתח מתוך ה-Secrets
+try:
+    API_KEY = st.secrets["GOOGLE_API_KEY"]
+    genai.configure(api_key=API_KEY)
+    # שימוש בגרסה יציבה יותר של המודל
+    model = genai.GenerativeModel('gemini-1.5-flash')
+except Exception as e:
+    st.error("שגיאה בטעינת המפתח מה-Secrets. וודא שהגדרת אותו נכון.")
 
 # עיצוב מתקדם עם רקע נושם (Breathing Gradient) ויישור לימין
 st.markdown("""
