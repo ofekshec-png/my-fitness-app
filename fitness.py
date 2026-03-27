@@ -9,7 +9,7 @@ try:
     if "GOOGLE_API_KEY" in st.secrets:
         API_KEY = st.secrets["GOOGLE_API_KEY"]
         genai.configure(api_key=API_KEY)
-        # שימוש בשם מודל נקי ללא קידומות
+        # פתרון ה-404: הגדרה ללא קידומת models/ ובדיקה אוטומטית
         model = genai.GenerativeModel('gemini-1.5-flash')
     else:
         st.error("Missing API Key in Secrets")
@@ -18,7 +18,7 @@ except Exception as e:
 
 st.set_page_config(page_title="BodyTrack AI | Pro", layout="wide")
 
-# עיצוב RTL ותיקון הסליידר והצ'קבוקסים
+# עיצוב RTL, רקע כהה ותיקון הסליידר והצ'קבוקסים
 st.markdown("""
     <style>
     .main, .stApp {
@@ -42,9 +42,9 @@ st.markdown("""
         border-radius: 12px;
         width: 100%;
     }
-    /* תיקון סופי לסליידר שלא יברח מהטווח */
+    /* תיקון סליידר */
     .stSlider [data-baseweb="slider"] { direction: LTR !important; }
-    /* עיצוב לצ'קבוקסים של המעקב */
+    /* עיצוב צ'קבוקסים "מה עשיתי היום" */
     .stCheckbox label p { font-size: 1.2rem; font-weight: bold; color: #00ff88; }
     </style>
     """, unsafe_allow_html=True)
@@ -54,16 +54,16 @@ def safe_generate(prompt_content):
         response = model.generate_content(prompt_content)
         return response.text
     except Exception as e:
-        # אם יש שגיאת 404, מנסים שם מודל חלופי יציב
+        # אם יש שגיאת 404, מנסים שם מודל חלופי יציב (פרו)
         try:
             alt_model = genai.GenerativeModel('gemini-pro')
             response = alt_model.generate_content(prompt_content)
             return response.text
         except:
-            return f"שגיאת תקשורת עם גוגל. נסה לעשות Reboot לאפליקציה. {e}"
+            return f"שגיאת תקשורת עם גוגל. חייב לבצע Delete ו-New App ב-Streamlit. {e}"
 
 st.title("⚡ BodyTrack AI Pro")
-tab1, tab2, tab3, tab4 = st.tabs(["🏋️ תוכנית אימון", "🥗 תפריט", "📊 מדדים", "✅ מעקב יומי"])
+tab1, tab2, tab3, tab4 = st.tabs(["🏋️ תוכנית אימון", "🥗 תפריט", "📊 מדדים", "✅ יומן ניצחונות"])
 
 with tab1:
     st.header("בניית תוכנית אימון")
@@ -90,8 +90,8 @@ with tab3:
         st.metric("ה-BMI שלך", f"{bmi:.1f}")
 
 with tab4:
-    st.header("📝 יומן ניצחונות")
-    st.subheader(f"סטטוס להיום: {datetime.date.today().strftime('%d/%m/%Y')}")
+    st.header("📝 מה עשיתי היום?")
+    st.subheader(f"סטטוס ל-{datetime.date.today().strftime('%d/%m/%Y')}")
     c1, c2 = st.columns(2)
     with c1:
         workout = st.checkbox("סימון אימון: בוצע! 🏋️")
@@ -100,4 +100,4 @@ with tab4:
     
     if workout and food:
         st.balloons()
-        st.success("יום מושלם! אתה בדרך למטרה.")
+        st.success("יום מושלם! אתה בדרך למטרה אלוף.")
