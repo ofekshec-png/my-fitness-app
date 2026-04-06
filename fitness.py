@@ -437,3 +437,53 @@ with tab4:
 """
                 result = ask_ai(prompt)
                 st.markdown(f'<div class="ai-result">{result}</div>', unsafe_allow_html=True)
+                # ─────────────────────────────────────────────
+# Session State ליומן ול-cache
+# ─────────────────────────────────────────────
+if "journal" not in st.session_state:
+    st.session_state.journal = []
+
+if "ai_cache" not in st.session_state:
+    st.session_state.ai_cache = {}
+
+# ─────────────────────────────────────────────
+# פונקציית AI עם retry + cache
+# ─────────────────────────────────────────────
+def ask_ai(prompt: str) -> str:
+    if model is None:
+        return "❌ אין חיבור ל-AI. בדוק את מפתח ה-API."
+
+    import time
+
+    # בדיקת cache
+    cache_key = prompt[:100]
+    if cache_key in st.session_state.ai_cache:
+        return st.session_state.ai_cache[cache_key]
+
+    for attempt in range(3):
+        try:
+            response = model.generate_content(
+                prompt,
+                generation_config=genai.GenerationConfig(
+                    max_output_tokens=1500,
+                    temperature=0.7
+                )
+            )
+            result = response.text
+
+            # שמירה ב-cache
+            st.session_state.ai_cache[cache_key] = result
+
+            return result
+
+        except Exception as e:
+            err = str(e)
+            if "429" in err and attempt < 2:
+                time.sleep(5 * (attempt + 1))
+                continue
+            if "quota" in err.lower():
+                return "⚠️ מכסת ה-API אזלה. הפעל חיוב ב-Google AI Studio."
+            if attempt == 2:
+                return f"❌ שגיאה: {e}"
+
+    return "❌ לא ניתן לקבל תשובה אחרי 3 ניסיונות."
